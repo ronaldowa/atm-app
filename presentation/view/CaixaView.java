@@ -45,13 +45,29 @@ public class CaixaView {
         }
     }
 
+    // 🔐 método de proteção
+    private boolean reautenticar() {
+
+        System.out.print("Confirme seu PIN: ");
+        int pin = scanner.nextInt();
+
+        try {
+            controller.autenticar(pin);
+            return true;
+
+        } catch (Exception e) {
+            System.out.println("Erro: " + e.getMessage());
+            return false;
+        }
+    }
+
     public void iniciar() {
 
         Conta conta = new Conta(500);
 
-        boolean cartaoInserido = entrar();
+        boolean entrou = entrar();
 
-        if (!cartaoInserido) {
+        if (!entrou) {
             System.out.println("Obrigado, volte sempre!");
             scanner.close();
             return;
@@ -72,11 +88,11 @@ public class CaixaView {
 
                 case 1:
                     exibirSaldo(conta);
-                    fluxoPosSaldo(conta, cartaoInserido);
+                    fluxoPosSaldo(conta);
                     break;
 
                 case 2:
-                    realizarSaque(conta, cartaoInserido);
+                    realizarSaque(conta);
                     break;
 
                 case 0:
@@ -102,22 +118,43 @@ public class CaixaView {
         }
     }
 
-    private void realizarSaque(Conta conta, boolean cartaoInserido) {
+    private void realizarSaque(Conta conta) {
+
+        // 🔐 proteção antes do saque
+        if (!reautenticar()) {
+            return;
+        }
 
         System.out.print("Digite o valor do saque: ");
         double valor = scanner.nextDouble();
 
         try {
-            double saldoAtual = controller.realizarSaque(cartaoInserido, conta, valor);
+            double saldoAtual = controller.realizarSaque(true, conta, valor);
+
             System.out.println("Saque realizado com sucesso.");
             System.out.println("Saldo atual: " + saldoAtual);
 
+            // ⏱️ contador regressivo estilo banco
+            System.out.print("\nSessão será encerrada em: ");
+
+            for (int i = 5; i >= 1; i--) {
+                System.out.print("\rSessão será encerrada em: " + i + " segundos ");
+                Thread.sleep(1000);
+            }
+
+            System.out.println("\nSessão encerrada por segurança.");
+            System.out.println("Obrigado, volte sempre!");
+
+            System.exit(0);
+
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("Erro: " + e.getMessage());
+        } catch (InterruptedException e) {
+            System.out.println("Erro no tempo de sessão.");
         }
     }
 
-    private void fluxoPosSaldo(Conta conta, boolean cartaoInserido) {
+    private void fluxoPosSaldo(Conta conta) {
 
         System.out.println("\nDeseja realizar um saque?");
         System.out.println("1 - Sim");
@@ -127,7 +164,7 @@ public class CaixaView {
         int escolha = scanner.nextInt();
 
         if (escolha == 1) {
-            realizarSaque(conta, cartaoInserido);
+            realizarSaque(conta);
         } else if (escolha == 2) {
             System.out.println("Operação finalizada.");
         } else {
