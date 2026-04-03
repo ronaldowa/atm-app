@@ -1,7 +1,6 @@
 package presentation.controller;
 
 import application.usecase.AutenticarUseCase;
-import application.usecase.GerenciarSessaoUseCase;
 import application.usecase.RealizarSaqueUseCase;
 import application.usecase.VerSaldoUseCase;
 import domain.model.Conta;
@@ -11,13 +10,11 @@ public class CaixaController {
     private RealizarSaqueUseCase saqueUseCase;
     private VerSaldoUseCase saldoUseCase;
     private AutenticarUseCase autenticarUseCase = new AutenticarUseCase();
-    private GerenciarSessaoUseCase sessaoUseCase;
 
 
     public CaixaController() {
         this.saqueUseCase = new RealizarSaqueUseCase();
         this.saldoUseCase = new VerSaldoUseCase();
-        this.sessaoUseCase = new GerenciarSessaoUseCase();
     }
 
     public double realizarSaque(boolean cartaoInserido, Conta conta, double valor) {
